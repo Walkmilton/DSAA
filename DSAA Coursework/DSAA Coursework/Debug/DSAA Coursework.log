@@ -1,2 +1,5 @@
 ﻿  main.cpp
+c:\users\declan doyle\desktop\dsaa coursework\dsaa coursework\main.cpp(446): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+c:\users\declan doyle\desktop\dsaa coursework\dsaa coursework\main.cpp(456): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+c:\users\declan doyle\desktop\dsaa coursework\dsaa coursework\main.cpp(501): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
   DSAA Coursework.vcxproj -> C:\Users\Declan Doyle\Desktop\DSAA Coursework\Debug\DSAA Coursework.exe

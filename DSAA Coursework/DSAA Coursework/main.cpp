@@ -2,27 +2,42 @@
 #include <chrono>
 #include <fstream>
 #include <string>
+#include <ctime>
+#include <cmath>
+
 
 using std::cout;
 using std::cin;
 using std::endl;
 using std::string;
 using std::chrono::duration_cast;
-using std::chrono::milliseconds;
-using std::ifstream;
+using std::chrono::nanoseconds;
 using std::ofstream;
+using std::to_string;
 
 typedef std::chrono::steady_clock the_clock;
 
 
 void menuChoice(int menu);
+
 void radix();
 void radixSize(int menu);
-void populateArray(int *list, int size, string file);
-void radixInit(int *list, int size, string file);
+void radixRange(int *list, int size);
+void radixInit(int menu, int *list, int size);
+void radixExecute(int *list, int size, int range, string file);
+void radixSort(int *input, int n);
 
+
+void merge();
+void mergeSize(int menu);
+void mergeRange(int *list, int size);
+void mergeInit(int menu, int *list, int size);
+void mergeExecute(int *list, int size, int range, string file);
+void mergeSort(int* input, int p, int r);
+void merge(int* input, int p, int r);
+
+void populateList(int *list, int size, int range);
 void print(int *input, int n);
-void radixsort(int *input, int n);
 
 
 //const int INPUT_SIZE = 10;
@@ -39,15 +54,13 @@ int main()
 	{
 		cout << "Declan Doyle Data Structures and Algorithms 1 Coursework Program" << endl;
 		cout << "Enter -1 to exit any menu screen" << endl;
-		cout << "Chose a sort:" << endl;
+		cout << "Choose a sort:" << endl;
 		cout << "1: Radix" << endl;
-		cout << "2: PUT SORT NAME HERE" << endl;
+		cout << "2: Merge" << endl;
 		cin >> menu;
+		cout << endl << endl;
 		menuChoice(menu);
 	}
-
-	cout << "Press any button to end" << endl;
-	getchar();
 
 	return 0;
 }
@@ -61,7 +74,7 @@ void menuChoice(int menu)
 	}
 	else if (menu == 2)
 	{
-		//PUT NEW SORT HERE
+		merge();	//merge sort menu
 	}
 	else if (menu > 2)	//display error if invalid choice
 	{
@@ -79,12 +92,14 @@ void radix()
 	while (menu != -1)
 	{
 		cout << "Radix Sort" << endl;
-		cout << "Chose the list size:" << endl;
+		cout << "Choose the list size:" << endl;
 		cout << "1: 10" << endl;
 		cout << "2: 100" << endl;
 		cout << "3: 1000" << endl;
 		cout << "4: 10,000" << endl;
+		cout << "5: 100,000" << endl;
 		cin >> menu;
+		cout << endl << endl;
 		radixSize(menu);
 	}
 
@@ -97,84 +112,136 @@ void radixSize(int menu)
 	{
 		const int ten = 10;
 		int list[ten];
-		string array = "ten.txt";
-		populateArray(list, ten, array);
-		string file = "Radix10.csv";
-		radixInit(list, ten, file);
+		radixRange(list, ten);
 	}
 	else if (menu == 2)
 	{
 		const int oneHundred = 100;
 		int list[oneHundred];
-		string array = "oneHundred.txt";
-		populateArray(list, oneHundred, array);
-		string file = "Radix100.csv";
-		radixInit(list, oneHundred, file);
+		radixRange(list, oneHundred);
 	}
 	else if (menu == 3)
 	{
-		const int oneThousand= 1000;
+		const int oneThousand = 1000;
 		int list[oneThousand];
-		string array = "oneThousand.txt";
-		populateArray(list, oneThousand, array);
-		string file = "Radix1000.csv";
-		radixInit(list, oneThousand, file);
+		radixRange(list, oneThousand);
 	}
 	else if (menu == 4)
 	{
-		const int oneHundredThousand = 10000;
-		int list[oneHundredThousand];
-		string array = "oneHundredThousand.txt";
-		populateArray(list, oneHundredThousand, array);
-		string file = "Radix10000.csv";
-		radixInit(list, oneHundredThousand, file);
+		const int tenThousand = 10000;
+		int list[tenThousand];
+		radixRange(list, tenThousand);
 	}
-	else if (menu > 4)
+	else if (menu == 5)
+	{
+		const int oneHundredThousand = 100000;
+		int list[oneHundredThousand];
+		radixRange(list, oneHundredThousand);
+	}
+	else if (menu > 5)
 	{
 		cout << "Invalid Choice" << endl;
 	}
 }
 
-void populateArray(int *list, int size, string file)
+void radixRange(int *list, int size)
 {
-	ifstream textFile(file);
+	int menu = 0;
 
-	for (int i = 0; i < size + 1; ++i)
+	cout << "Radix Sort" << endl;
+	cout << "Choose the list range:" << endl;
+	cout << "1: 0-10" << endl;
+	cout << "2: 0-100" << endl;
+	cout << "3: 0-1000" << endl;
+	cout << "4: 0-10,000" << endl;
+	cout << "5: 0-100,000" << endl;
+	cin >> menu;
+	cout << endl << endl;
+	radixInit(menu, list, size);
+
+}
+
+
+void radixInit(int menu, int *list, int size)
+{
+	if (menu == 1)
 	{
-		textFile >> list[i];
+		const int range = 10;
+		populateList(list, size, range);
+		string file = to_string(size) + "Radix" + to_string(range) + ".csv";
+		radixExecute(list, size, range, file);
+
+	}
+	else if (menu == 2)
+	{
+		const int range = 100;
+		populateList(list, size, range);
+		string file = to_string(size) + "Radix" + to_string(range) + ".csv";
+		radixExecute(list, size, range, file);
+
+	}
+	else if (menu == 3)
+	{
+		const int range = 1000;
+		populateList(list, size, range);
+		string file = to_string(size) + "Radix" + to_string(range) + ".csv";
+		radixExecute(list, size, range, file);
+
+	}
+	if (menu == 4)
+	{
+		const int range = 10000;
+		populateList(list, size, range);
+		string file = to_string(size) + "Radix" + to_string(range) + ".csv";
+		radixExecute(list, size, range, file);
+
+	}
+	if (menu == 5)
+	{
+		const int range = 100000;
+		populateList(list, size, range);
+		string file = to_string(size) + "Radix" + to_string(range) + ".csv";
+		radixExecute(list, size, range, file);
+
+	}
+	if (menu > 5)
+	{
+		cout << "Invalid Choice" << endl;
 	}
 }
 
-void radixInit(int *list, int size, string file)
+void radixExecute(int *list, int size, int range, string file)
 {
+
+	char temp;
 	cout << "List size " << size << " selected" << endl;
-	cout << "Press any key to begin benchmark" << endl;
-	getchar();
+	cout << "List range " << range << " selected" << endl;
+	cout << "Enter 'g' to begin benchmark" << endl;
+	cin >> temp;
+
 
 	ofstream my_file(file);
 
-	for (int i = 1; i < 1001; i++)
+	for (int i = 0; i < 1000; i++)
 	{
 		the_clock::time_point start = the_clock::now();
-		radixsort(list, size);
+		radixSort(list, size);
 		the_clock::time_point end = the_clock::now();
-		auto time_taken = duration_cast<milliseconds>(end - start).count();
+		auto time_taken = duration_cast<nanoseconds>(end - start).count();
 		my_file << time_taken << ", " << i << endl;
 	}
 
+	cout << endl << endl << endl;
 	cout << "Sorts completed. Data saved to a file called " << file << endl;
+	cout << "File name is as follows: [List Size][Sort Type][List Range].csv" << endl << endl;
+	cout << "Enter 'g' to go to previous menu" << endl;
+	cin >> temp;
+	cout << endl << endl;
 
 	//cout << "Sort took " << time_taken << " ms. " << endl;
-
 }
 
-void print(int *input, int n)
-{
-	for (int i = 0; i < n; i++)
-		cout << input[i] << "\t";
-}
-
-void radixsort(int *input, int n)
+void radixSort(int *input, int n)
 {
 	int i;
 
@@ -211,7 +278,235 @@ void radixsort(int *input, int n)
 		// Move to next decimal place.
 		exp *= 10;
 
-		cout << endl << "PASS   : ";
-		print(input, n);
+
 	}
+}
+
+void merge()
+{
+	//Menu variable
+	int menu = 0;
+
+	//Displaying the menu and inputting a menu choice
+	while (menu != -1)
+	{
+		cout << "Merge Sort" << endl;
+		cout << "Choose the list size:" << endl;
+		cout << "1: 10" << endl;
+		cout << "2: 100" << endl;
+		cout << "3: 1000" << endl;
+		cout << "4: 10,000" << endl;
+		cout << "5: 100,000" << endl;
+		cin >> menu;
+		cout << endl << endl;
+		mergeSize(menu);
+	}
+
+}
+
+void mergeSize(int menu)
+{
+	//Follow up on menu choice
+	if (menu == 1)
+	{
+		const int ten = 10;
+		int list[ten];
+		mergeRange(list, ten);
+	}
+	else if (menu == 2)
+	{
+		const int oneHundred = 100;
+		int list[oneHundred];
+		mergeRange(list, oneHundred);
+	}
+	else if (menu == 3)
+	{
+		const int oneThousand = 1000;
+		int list[oneThousand];
+		mergeRange(list, oneThousand);
+	}
+	else if (menu == 4)
+	{
+		const int tenThousand = 10000;
+		int list[tenThousand];
+		mergeRange(list, tenThousand);
+	}
+	else if (menu == 5)
+	{
+		const int oneHundredThousand = 100000;
+		int list[oneHundredThousand];
+		mergeRange(list, oneHundredThousand);
+	}
+	else if (menu > 5)
+	{
+		cout << "Invalid Choice" << endl;
+	}
+}
+
+void mergeRange(int *list, int size)
+{
+	int menu = 0;
+
+	cout << "Merge Sort" << endl;
+	cout << "Choose the list range:" << endl;
+	cout << "1: 0-10" << endl;
+	cout << "2: 0-100" << endl;
+	cout << "3: 0-1000" << endl;
+	cout << "4: 0-10,000" << endl;
+	cout << "5: 0-100,000" << endl;
+	cin >> menu;
+	cout << endl << endl;
+	mergeInit(menu, list, size);
+
+}
+
+void mergeInit(int menu, int *list, int size)
+{
+	if (menu == 1)
+	{
+		const int range = 10;
+		populateList(list, size, range);
+		string file = to_string(size) + "Merge" + to_string(range) + ".csv";
+		mergeExecute(list, size, range, file);
+
+	}
+	else if (menu == 2)
+	{
+		const int range = 100;
+		populateList(list, size, range);
+		string file = to_string(size) + "Merge" + to_string(range) + ".csv";
+		mergeExecute(list, size, range, file);
+
+	}
+	else if (menu == 3)
+	{
+		const int range = 1000;
+		populateList(list, size, range);
+		string file = to_string(size) + "Merge" + to_string(range) + ".csv";
+		mergeExecute(list, size, range, file);
+
+	}
+	if (menu == 4)
+	{
+		const int range = 10000;
+		populateList(list, size, range);
+		string file = to_string(size) + "Merge" + to_string(range) + ".csv";
+		mergeExecute(list, size, range, file);
+
+	}
+	if (menu == 5)
+	{
+		const int range = 100000;
+		populateList(list, size, range);
+		string file = to_string(size) + "Merge" + to_string(range) + ".csv";
+		mergeExecute(list, size, range, file);
+
+	}
+	if (menu > 5)
+	{
+		cout << "Invalid Choice" << endl;
+	}
+}
+
+void mergeExecute(int *list, int size, int range, string file)
+{
+	const int zero = 0;
+	char temp;
+	cout << "List size " << size << " selected" << endl;
+	cout << "List range " << range << " selected" << endl;
+	cout << "Enter 'g' to begin benchmark" << endl;
+	cin >> temp;
+
+	ofstream my_file(file);
+
+	for (int i = 0; i < 1000; i++)
+	{
+		the_clock::time_point start = the_clock::now();
+		mergeSort(list, zero, size - 1);
+		the_clock::time_point end = the_clock::now();
+		auto time_taken = duration_cast<nanoseconds>(end - start).count();
+		my_file << time_taken << ", " << i << endl;
+	}
+
+	cout << endl << endl << endl;
+	cout << "Sorts completed. Data saved to a file called " << file << endl;
+	cout << "File name is as follows: [List Size][Sort Type][List Range].csv" << endl << endl;
+	cout << "Enter 'g' to go to previous menu" << endl;
+	cin >> temp;
+	cout << endl << endl;
+
+	//cout << "Sort took " << time_taken << " ms. " << endl;
+
+}
+
+void mergeSort(int* input, int p, int r)
+{
+	if (p < r)
+	{
+		int mid = floor((p + r) / 2);
+		mergeSort(input, p, mid);
+		mergeSort(input, mid + 1, r);
+		merge(input, p, r);
+	}
+}
+
+void merge(int* input, int p, int r)
+{
+	int a = r - p + 1;
+	int mid = floor((p + r) / 2);
+	int i1 = 0;
+	int i2 = p;
+	int i3 = mid + 1;
+
+	// Temp array
+	int *temp = new int[a];
+
+	// Merge in sorted form the 2 arrays
+	while (i2 <= mid && i3 <= r)
+	{
+		if (input[i2] < input[i3])
+		{
+			temp[i1++] = input[i2++];
+		}
+		else
+		{
+			temp[i1++] = input[i3++];
+		}
+	}
+
+	// Merge the remaining elements in left array
+	while (i2 <= mid)
+	{
+		temp[i1++] = input[i2++];
+	}
+
+	// Merge the remaining elements in right array
+	while (i3 <= r)
+	{
+		temp[i1++] = input[i3++];
+	}
+
+	// Move from temp array to master array
+	for (int x = p; x <= r; x++)
+	{
+		input[x] = temp[x - p];
+	}
+
+	delete[] temp;
+}
+
+
+void populateList(int *list, int size, int range)
+{
+	srand(time(0));
+	for (int i = 0; i < size; i++)
+	{
+		list[i] = rand() % range + 1;
+	}
+}
+
+void print(int *input, int n)
+{
+	for (int i = 0; i < n; i++)
+		cout << input[i] << "\t";
 }
